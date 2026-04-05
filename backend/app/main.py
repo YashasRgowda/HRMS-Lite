@@ -3,14 +3,16 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.database import engine, Base
-from app.routers import employees, attendance, dashboard
+from app.core.config import settings
+from app.core.database import engine, Base
+from app.routes import employees, attendance, dashboard
 
-import app.models  # noqa: F401 — registers models with SQLAlchemy before create_all
+import app.models  # noqa: F401 — ensures all ORM models are registered before create_all
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Create all database tables on startup."""
     Base.metadata.create_all(bind=engine)
     yield
 
@@ -98,10 +100,12 @@ tags_metadata = [
     },
 ]
 
+# ── App instance ───────────────────────────────────────────────────────────────
+
 app = FastAPI(
-    title="HRMS Lite API",
+    title=settings.APP_TITLE,
     description=DESCRIPTION,
-    version="1.0.0",
+    version=settings.APP_VERSION,
     openapi_tags=tags_metadata,
     contact={
         "name": "HRMS Lite",
@@ -109,6 +113,8 @@ app = FastAPI(
     },
     lifespan=lifespan,
 )
+
+# ── Middleware ─────────────────────────────────────────────────────────────────
 
 app.add_middleware(
     CORSMiddleware,
@@ -118,16 +124,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── Routers ────────────────────────────────────────────────────────────────────
+
 app.include_router(employees.router)
 app.include_router(attendance.router)
 app.include_router(dashboard.router)
 
 
-@app.get(
-    "/",
-    tags=["Health"],
-    summary="API Health Check",
-    response_description="Returns OK status when the API is running.",
-)
+# ── Health check ───────────────────────────────────────────────────────────────
+
+@app.get("/", tags=["Health"], summary="API Health Check")
 def root():
-    return {"status": "ok", "message": "HRMS Lite API is running"}
+    return {"status": "ok", "message": f"{settings.APP_TITLE} is running"}

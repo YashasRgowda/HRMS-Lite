@@ -1,12 +1,12 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 
-from app.database import get_db
-from app.models import Employee, AttendanceStatus
-from app.schemas import EmployeeCreate, EmployeeOut, EmployeeWithStats, MessageResponse
+from app.core.database import get_db
+from app.schemas.employee import EmployeeCreate, EmployeeOut, EmployeeWithStats
+from app.schemas.common import MessageResponse
+from app.services import employee_service
 
 router = APIRouter(prefix="/employees", tags=["Employees"])
 
@@ -29,19 +29,7 @@ Each employee in the response includes:
     response_description="Array of employee objects with attendance statistics.",
 )
 def list_employees(db: Session = Depends(get_db)):
-    employees = db.query(Employee).order_by(Employee.created_at.desc()).all()
-    result = []
-    for emp in employees:
-        total_present = sum(1 for a in emp.attendance if a.status == AttendanceStatus.present)
-        total_absent = sum(1 for a in emp.attendance if a.status == AttendanceStatus.absent)
-        result.append(
-            EmployeeWithStats(
-                **EmployeeOut.model_validate(emp).model_dump(),
-                total_present=total_present,
-                total_absent=total_absent,
-            )
-        )
-    return result
+    return employee_service.list_employees(db)
 
 
 @router.post(
@@ -68,33 +56,7 @@ Creates a new employee record in the system.
     response_description="The newly created employee record with auto-generated `id`.",
 )
 def create_employee(payload: EmployeeCreate, db: Session = Depends(get_db)):
-    existing = db.query(Employee).filter(
-        (Employee.employee_id == payload.employee_id) | (Employee.email == payload.email)
-    ).first()
-
-    if existing:
-        if existing.employee_id == payload.employee_id:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"HR code '{payload.employee_id}' is already assigned to another employee.",
-            )
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Email '{payload.email}' is already registered to another employee.",
-        )
-
-    employee = Employee(**payload.model_dump())
-    db.add(employee)
-    try:
-        db.commit()
-        db.refresh(employee)
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="An employee with this HR code or email already exists.",
-        )
-    return employee
+    return employee_service.create_employee(db, payload)
 
 
 @router.get(
@@ -118,16 +80,7 @@ Fetches a single employee record by their database `id`.
     response_description="The employee record with total present and absent day counts.",
 )
 def get_employee(id: int, db: Session = Depends(get_db)):
-    emp = db.query(Employee).filter(Employee.id == id).first()
-    if not emp:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No employee found with id={id}.")
-    total_present = sum(1 for a in emp.attendance if a.status == AttendanceStatus.present)
-    total_absent = sum(1 for a in emp.attendance if a.status == AttendanceStatus.absent)
-    return EmployeeWithStats(
-        **EmployeeOut.model_validate(emp).model_dump(),
-        total_present=total_present,
-        total_absent=total_absent,
-    )
+    return employee_service.get_employee(db, id)
 
 
 @router.delete(
@@ -153,14 +106,4 @@ Permanently deletes an employee record by their database `id`.
     response_description="Confirmation message with the name and HR code of the deleted employee.",
 )
 def delete_employee(id: int, db: Session = Depends(get_db)):
-    emp = db.query(Employee).filter(Employee.id == id).first()
-    if not emp:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No employee found with id={id}.")
-    name = emp.full_name
-    emp_code = emp.employee_id
-    db.delete(emp)
-    db.commit()
-    return MessageResponse(
-        success=True,
-        message=f"Employee '{name}' ({emp_code}) and all their attendance records have been deleted.",
-    )
+    return employee_service.delete_employee(db, id)
