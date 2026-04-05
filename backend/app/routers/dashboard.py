@@ -7,10 +7,27 @@ from app.database import get_db
 from app.models import Employee, Attendance, AttendanceStatus
 from app.schemas import DashboardStats
 
-router = APIRouter(prefix="/dashboard", tags=["dashboard"])
+router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
 
-@router.get("", response_model=DashboardStats)
+@router.get(
+    "",
+    response_model=DashboardStats,
+    summary="Get Dashboard Statistics",
+    description="""
+Returns a real-time attendance summary for **today's date**.
+
+**Response fields:**
+
+- `total_employees` — Total number of employees registered in the system.
+- `present_today` — Employees marked as **Present** today.
+- `absent_today` — Employees marked as **Absent** today.
+- `not_marked_today` — Employees whose attendance has **not yet been marked** today.
+
+No parameters required. The date is automatically set to today.
+""",
+    response_description="Aggregated HR statistics for today.",
+)
 def get_dashboard(db: Session = Depends(get_db)):
     today = date.today()
 
