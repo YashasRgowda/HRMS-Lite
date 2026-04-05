@@ -3,11 +3,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import settings
-from app.core.database import engine, Base
-from app.routes import employees, attendance, dashboard
-
 import app.models  # noqa: F401 — ensures all ORM models are registered before create_all
+from app.core.config import settings
+from app.core.database import Base, engine
+from app.routes import attendance, dashboard, employees
 
 
 @asynccontextmanager

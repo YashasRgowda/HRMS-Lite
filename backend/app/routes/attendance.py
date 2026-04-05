@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.schemas.attendance import AttendanceCreate, AttendanceStatusUpdate, AttendanceOut
+from app.schemas.attendance import AttendanceCreate, AttendanceOut, AttendanceStatusUpdate
 from app.schemas.common import MessageResponse
 from app.services import attendance_service
 

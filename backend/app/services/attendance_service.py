@@ -2,15 +2,14 @@ from datetime import date as DateType
 from typing import List, Optional
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
+from app.models.attendance import Attendance, AttendanceStatus
 from app.models.employee import Employee
-from app.models.attendance import Attendance
-from app.schemas.attendance import AttendanceCreate, AttendanceStatusUpdate, AttendanceOut
-from app.schemas.dashboard import DashboardStats
+from app.schemas.attendance import AttendanceCreate, AttendanceOut, AttendanceStatusUpdate
 from app.schemas.common import MessageResponse
-from app.models.attendance import AttendanceStatus
+from app.schemas.dashboard import DashboardStats
 
 
 def _enrich(record: Attendance) -> AttendanceOut:

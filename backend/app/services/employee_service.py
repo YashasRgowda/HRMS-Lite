@@ -1,13 +1,13 @@
 from typing import List
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
-from app.models.employee import Employee
 from app.models.attendance import AttendanceStatus
-from app.schemas.employee import EmployeeCreate, EmployeeOut, EmployeeWithStats
+from app.models.employee import Employee
 from app.schemas.common import MessageResponse
+from app.schemas.employee import EmployeeCreate, EmployeeOut, EmployeeWithStats
 
 
 def list_employees(db: Session) -> List[EmployeeWithStats]:
