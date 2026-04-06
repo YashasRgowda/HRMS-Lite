@@ -1,49 +1,59 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useCallback, useMemo } from "react";
 
 const SidebarContext = createContext(undefined);
 
 const STORAGE_KEY = "hrms-sidebar-collapsed";
 
+// Helper to safely get from localStorage (only on client)
+function getInitialCollapsed() {
+    if (typeof window === "undefined") return false;
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : false;
+    } catch {
+        return false;
+    }
+}
+
 export function SidebarProvider({ children }) {
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    // Initialize state directly from localStorage (no useEffect needed)
+    const [isCollapsed, setIsCollapsed] = useState(getInitialCollapsed);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-    // Load saved state from localStorage on mount
-    useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved !== null) {
-            setIsCollapsed(JSON.parse(saved));
-        }
+    const toggleCollapsed = useCallback(() => {
+        setIsCollapsed((prev) => {
+            const newValue = !prev;
+            // Save to localStorage when toggling
+            if (typeof window !== "undefined") {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(newValue));
+            }
+            return newValue;
+        });
     }, []);
 
-    // Save state to localStorage when it changes
-    useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(isCollapsed));
-    }, [isCollapsed]);
+    const toggleMobile = useCallback(() => {
+        setIsMobileOpen((prev) => !prev);
+    }, []);
 
-    // Close mobile nav on route change
-    useEffect(() => {
+    const closeMobile = useCallback(() => {
         setIsMobileOpen(false);
     }, []);
 
-    const toggleCollapsed = () => setIsCollapsed((prev) => !prev);
-    const toggleMobile = () => setIsMobileOpen((prev) => !prev);
-    const closeMobile = () => setIsMobileOpen(false);
+    const value = useMemo(
+        () => ({
+            isCollapsed,
+            isMobileOpen,
+            toggleCollapsed,
+            toggleMobile,
+            closeMobile,
+        }),
+        [isCollapsed, isMobileOpen, toggleCollapsed, toggleMobile, closeMobile]
+    );
 
     return (
-        <SidebarContext.Provider
-            value={{
-                isCollapsed,
-                isMobileOpen,
-                toggleCollapsed,
-                toggleMobile,
-                closeMobile,
-            }}
-        >
-            {children}
-        </SidebarContext.Provider>
+        <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>
     );
 }
 
