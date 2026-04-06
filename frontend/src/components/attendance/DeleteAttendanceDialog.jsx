@@ -11,13 +11,13 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 
-export function DeleteEmployeeDialog({ employee, open, onOpenChange, onConfirm }) {
+export function DeleteAttendanceDialog({ record, open, onOpenChange, onConfirm }) {
     const [loading, setLoading] = useState(false);
 
     const handleDelete = async () => {
         setLoading(true);
         try {
-            await onConfirm(employee.id);
+            await onConfirm(record.id);
             onOpenChange(false);
         } catch (err) {
             console.error(err);
@@ -26,18 +26,25 @@ export function DeleteEmployeeDialog({ employee, open, onOpenChange, onConfirm }
         }
     };
 
+    if (!record) return null;
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-sm">
                 <DialogHeader>
-                    <DialogTitle>Delete Employee</DialogTitle>
+                    <DialogTitle>Delete Attendance Record</DialogTitle>
                     <DialogDescription>
-                        Are you sure you want to delete{" "}
+                        Are you sure you want to delete the attendance record for{" "}
                         <span className="font-semibold text-foreground">
-                            {employee?.full_name}
-                        </span>
-                        ? This will also remove all their attendance records. This action
-                        cannot be undone.
+                            {record.employee_name}
+                        </span>{" "}
+                        on{" "}
+                        {new Date(record.date + "T00:00:00").toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                        })}
+                        ? This action cannot be undone.
                     </DialogDescription>
                 </DialogHeader>
 
