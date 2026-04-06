@@ -12,8 +12,12 @@ class Settings:
     APP_VERSION: str = "1.0.0"
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
 
+    # Handle Supabase/Render postgres:// vs postgresql:// issue
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
     if not DATABASE_URL:
-        raise RuntimeError("DATABASE_URL is not set. Check your .env file.")
+        raise RuntimeError("DATABASE_URL is not set. Check your environment variables.")
 
 
 settings = Settings()
