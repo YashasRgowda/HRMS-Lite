@@ -12,7 +12,7 @@ class Settings:
     APP_VERSION: str = "1.0.0"
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
 
-    # Handle Supabase/Render postgres:// vs postgresql:// issue
+    # Handle postgres:// vs postgresql:// (some providers use postgres://)
     if DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
