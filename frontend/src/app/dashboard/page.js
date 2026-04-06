@@ -9,7 +9,7 @@ import { RecentAttendance } from "@/components/dashboard/RecentAttendance";
 import { useDashboard } from "@/hooks/useDashboard";
 
 export default function DashboardPage() {
-  const { stats, recentAttendance, loading, error } = useDashboard();
+  const { stats, recentAttendance, loading, error, refetch } = useDashboard();
 
   const today = new Date().toLocaleDateString("en-IN", {
     weekday: "long",
@@ -45,25 +45,32 @@ export default function DashboardPage() {
               <StatCard
                 title="Present Today"
                 value={stats.present_today}
-                subtitle="Marked present"
+                subtitle="Marked present today"
                 icon={UserCheck}
                 color="emerald"
               />
               <StatCard
                 title="Absent Today"
                 value={stats.absent_today}
-                subtitle="Marked absent"
+                subtitle="Marked absent today"
                 icon={UserX}
                 color="rose"
               />
               <StatCard
                 title="Not Marked"
                 value={stats.not_marked_today}
-                subtitle="Pending today"
+                subtitle="Pending for today"
                 icon={Clock}
                 color="amber"
               />
             </div>
+
+            {/* Today's note */}
+            {stats.not_marked_today > 0 && stats.total_employees > 0 && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                ⚠️ {stats.not_marked_today} employee{stats.not_marked_today !== 1 ? "s have" : " has"} not been marked for today yet.
+              </div>
+            )}
 
             {/* Recent Attendance */}
             <RecentAttendance records={recentAttendance} />

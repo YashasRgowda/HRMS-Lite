@@ -1,6 +1,7 @@
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/layout/AppShell";
+import { Toaster } from "sonner";
 
 const geist = Geist({
   variable: "--font-geist-sans",
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${geist.variable} h-full`}>
       <body className="h-full font-sans antialiased">
         <AppShell>{children}</AppShell>
+        <Toaster position="top-right" richColors closeButton />
       </body>
     </html>
   );

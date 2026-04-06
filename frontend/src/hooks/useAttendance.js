@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 import { attendanceApi } from "@/lib/api";
 
 export function useAttendance() {
@@ -26,20 +27,38 @@ export function useAttendance() {
   }, [fetchRecords]);
 
   const markAttendance = async (payload) => {
-    const newRecord = await attendanceApi.mark(payload);
-    await fetchRecords();
-    return newRecord;
+    try {
+      const newRecord = await attendanceApi.mark(payload);
+      await fetchRecords();
+      toast.success("Attendance marked successfully!");
+      return newRecord;
+    } catch (err) {
+      toast.error(err.message);
+      throw err;
+    }
   };
 
   const updateAttendance = async (id, payload) => {
-    const updated = await attendanceApi.update(id, payload);
-    await fetchRecords();
-    return updated;
+    try {
+      const updated = await attendanceApi.update(id, payload);
+      await fetchRecords();
+      toast.success("Attendance updated successfully!");
+      return updated;
+    } catch (err) {
+      toast.error(err.message);
+      throw err;
+    }
   };
 
   const deleteAttendance = async (id) => {
-    await attendanceApi.delete(id);
-    await fetchRecords();
+    try {
+      await attendanceApi.delete(id);
+      await fetchRecords();
+      toast.success("Attendance record deleted.");
+    } catch (err) {
+      toast.error(err.message);
+      throw err;
+    }
   };
 
   return {

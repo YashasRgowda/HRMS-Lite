@@ -13,7 +13,9 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 
-const TODAY = new Date().toISOString().split("T")[0];
+const TODAY = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000)
+  .toISOString()
+  .split("T")[0];
 
 export function MarkAttendanceDialog({ open, onOpenChange, onSubmit, employees }) {
     const [form, setForm] = useState({

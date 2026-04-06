@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 import { employeesApi } from "@/lib/api";
 
 export function useEmployees() {
@@ -26,14 +27,26 @@ export function useEmployees() {
   }, [fetchEmployees]);
 
   const createEmployee = async (payload) => {
-    const newEmployee = await employeesApi.create(payload);
-    await fetchEmployees();
-    return newEmployee;
+    try {
+      const newEmployee = await employeesApi.create(payload);
+      await fetchEmployees();
+      toast.success(`Employee "${payload.full_name}" added successfully!`);
+      return newEmployee;
+    } catch (err) {
+      toast.error(err.message);
+      throw err;
+    }
   };
 
   const deleteEmployee = async (id) => {
-    await employeesApi.delete(id);
-    await fetchEmployees();
+    try {
+      await employeesApi.delete(id);
+      await fetchEmployees();
+      toast.success("Employee deleted successfully.");
+    } catch (err) {
+      toast.error(err.message);
+      throw err;
+    }
   };
 
   return {

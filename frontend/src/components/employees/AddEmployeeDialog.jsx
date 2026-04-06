@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,10 +21,17 @@ const EMPTY_FORM = {
     department: "",
 };
 
-export function AddEmployeeDialog({ open, onOpenChange, onSubmit }) {
+export function AddEmployeeDialog({ open, onOpenChange, onSubmit, nextEmployeeId }) {
     const [form, setForm] = useState(EMPTY_FORM);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+
+    // Auto-fill employee ID when dialog opens
+    useEffect(() => {
+        if (open && nextEmployeeId) {
+            setForm((prev) => ({ ...prev, employee_id: nextEmployeeId }));
+        }
+    }, [open, nextEmployeeId]);
 
     const handleChange = (e) => {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -73,7 +80,12 @@ export function AddEmployeeDialog({ open, onOpenChange, onSubmit }) {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="employee_id">Employee ID</Label>
+                        <Label htmlFor="employee_id">
+                            Employee ID
+                            <span className="ml-2 text-xs font-normal text-muted-foreground">
+                                (auto-generated, you can edit)
+                            </span>
+                        </Label>
                         <Input
                             id="employee_id"
                             name="employee_id"

@@ -4,6 +4,7 @@ async function request(path, options = {}) {
   const url = `${BASE_URL}${path}`;
   const res = await fetch(url, {
     headers: { "Content-Type": "application/json", ...options.headers },
+    cache: "no-store",
     ...options,
   });
 
@@ -23,16 +24,12 @@ async function request(path, options = {}) {
   return data;
 }
 
-// ── Employees ──────────────────────────────────────────────────────────────────
-
 export const employeesApi = {
   list: () => request("/employees"),
   create: (body) => request("/employees", { method: "POST", body: JSON.stringify(body) }),
   delete: (id) => request(`/employees/${id}`, { method: "DELETE" }),
   get: (id) => request(`/employees/${id}`),
 };
-
-// ── Attendance ─────────────────────────────────────────────────────────────────
 
 export const attendanceApi = {
   list: (params = {}) => {
@@ -46,8 +43,6 @@ export const attendanceApi = {
   update: (id, body) => request(`/attendance/${id}`, { method: "PUT", body: JSON.stringify(body) }),
   delete: (id) => request(`/attendance/${id}`, { method: "DELETE" }),
 };
-
-// ── Dashboard ──────────────────────────────────────────────────────────────────
 
 export const dashboardApi = {
   stats: () => request("/dashboard"),

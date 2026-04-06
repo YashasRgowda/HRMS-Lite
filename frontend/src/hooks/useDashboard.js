@@ -30,6 +30,22 @@ export function useDashboard() {
     fetchDashboard();
   }, [fetchDashboard]);
 
+  // Refetch whenever the user comes back to this tab/page
+  useEffect(() => {
+    const handleFocus = () => fetchDashboard();
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") fetchDashboard();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [fetchDashboard]);
+
   return {
     stats,
     recentAttendance,

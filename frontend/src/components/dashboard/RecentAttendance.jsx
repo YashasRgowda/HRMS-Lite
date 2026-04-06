@@ -52,7 +52,7 @@ export function RecentAttendance({ records }) {
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                     {record.employee_code} ·{" "}
-                                    {new Date(record.date).toLocaleDateString("en-IN", {
+                                    {new Date(record.date + "T00:00:00").toLocaleDateString("en-IN", {
                                         day: "2-digit",
                                         month: "short",
                                         year: "numeric",
